@@ -23,6 +23,16 @@ class Snake(object):
     def ixs(self):
         return [ix for ix, _direction in self.body]
 
+    def next_ixs(self):
+        """Returns the next set of ixs, will crash if not possible"""
+        # TODO
+        assert 1 == 0
+
+    def step_result(self):
+        """Returns "Okay" or "Wall_collision"."""
+        # TODO
+        assert 1 == 0
+
     def print(self):
         print("Snake: ", self.player)
         print(self.body)
@@ -73,6 +83,38 @@ class Board(object):
             snake.reset()
 
         self.add_fruit()
+
+    def step_results(self):
+        step_results = {}
+        next_ixs = {}
+
+        for snake in self.snakes:
+            step_result = snake.step_result()
+            assert step_result in ["Okay", "Wall_collision"]
+
+            step_results[snake.player] = step_result
+            next_ixs[snake.player] = snake.next_ixs()
+
+        for player, other_player in zip([1, 2], [2, 1]):
+            if step_results[player] == "Okay":
+                head_ix = next_ixs[player][0]
+                other_ixs = next_ixs[other_player]
+
+                if head_ix in other_ixs:
+                    # This means a head on head collision will be a draw (both lose)
+                    step_results[player] = "Snake_collision"
+
+        return step_results
+
+    def step(self):
+
+        assert self.step_results() == {1: "Okay", 2: "Okay"}
+
+        for snake in self.snakes:
+            snake.step()
+
+        # TODO What about fruit
+        assert 1 == 0
 
     def image_str(self):
         image_str = np.full((self.n, self.n), " ")
