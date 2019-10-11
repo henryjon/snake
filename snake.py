@@ -74,8 +74,28 @@ class Board(object):
 
         self.add_fruit()
 
+    def image_str(self):
+        image_str = np.full((self.n, self.n), " ")
+
+        if self.fruit_ix is not None:
+            image_str[self.fruit_ix] = "*"
+
+        for snake in self.snakes:
+            for ix, direction in snake.body:
+                image_str[ix] = {"U": "^", "D": "v", "L": "<", "R": ">"}[direction]
+
+        image_str = (
+            ("." * (self.n + 2) + "\n")
+            + "".join("." + "".join(x for x in line) + ".\n" for line in image_str)
+            + ("." * (self.n + 2) + "\n")
+        )
+
+        return image_str
+
     def print(self):
         for snake in self.snakes:
             snake.print()
 
         print("Fruit: ", self.fruit_ix)
+
+        print(self.image_str())
