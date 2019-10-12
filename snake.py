@@ -23,6 +23,14 @@ class Snake(object):
         elif self.player == 2:
             self.body = [((self.n - 1, self.n - 1), "U")]
 
+    def change_direction(self, new_direction):
+        old_direction = self.body[0][1]
+        bad_direction = {"U": "D", "D": "U", "L": "R", "R": "L"}[old_direction]
+
+        assert new_direction != bad_direction
+
+        self.body[0] = (self.body[0][0], new_direction)
+
     def ixs(self):
         return [ix for ix, _direction in self.body]
 
@@ -137,10 +145,13 @@ class Board(object):
 
         return step_results
 
+    def okay_to_step(self):
+        return self.step_results() == {1: "Okay", 2: "Okay"}
+
     def step(self):
 
         # Ensure that no snakes are going to collide with the wall or each other
-        assert self.step_results() == {1: "Okay", 2: "Okay"}
+        assert self.okay_to_step()
 
         fruit_eaten = False
         for snake in self.snakes:
@@ -184,9 +195,18 @@ class Player(object):
     """A player on an n x n game of snake"""
 
     def __init__(self, n, policy):
-        """[policy] is a function from a board state to a move in ["U", "D", "L", "R"]"""
+        """[policy] is a function from a board state to a move ("U", "D", "L", "R")"""
         self.n = n
+
         self.policy = policy
+
+    def execute_policy(self, board, player):
+        assert player in [1, 2]
+
+        next_direction = self.policy(board)
+        assert next_direction in ["U", "D", "L", "R"]
+
+        board.snakes[player - 1].change_direction(next_direction)
 
 
 class Game(object):
@@ -197,6 +217,25 @@ class Game(object):
 
         self.board = Board(n)
 
-    def step(self):
-        # TODO
-        assert False
+    def play(self):
+        self.board.reset()
+
+        self.board.print()
+        while self.board.okay_to_step():
+
+            self.player1.execute_policy(self.board, 1)
+            self.player2.execute_policy(self.board, 2)
+
+            self.board.print()
+            self.board.step()
+            self.board.print()
+
+        step_results = self.board.step_results()
+        print(step_results)
+
+        if step_results[1] == "Okay" and step_results[2] != "Okay":
+            print("Player 1 wins")
+        elif step_results[2] == "Okay" and step_results[1] != "Okay":
+            print("Player 2 wins")
+        else:
+            print("Draw")

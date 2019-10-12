@@ -16,5 +16,4 @@ player1 = snake.Player(n, policy1)
 player2 = snake.Player(n, policy2)
 
 game = snake.Game(n, player1, player2)
-for i in range(n + 2):
-    game.step()
+game.play()
